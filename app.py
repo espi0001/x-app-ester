@@ -6,6 +6,7 @@ import x
 import time
 import uuid
 import os
+import dictionary
 
 from icecream import ic
 ic.configureOutput(prefix=f'----- | ', includeContext=True)
@@ -17,7 +18,7 @@ app.config['MAX_CONTENT_LENGTH'] = 1 * 1024 * 1024   # 1 MB
 
 app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
- 
+
 
 ##############################
 ##############################
@@ -29,20 +30,26 @@ def _____USER_____(): pass
 
 @app.get("/")
 def view_index():
-   
+
     return render_template("index.html")
 
 ##############################
 @app.route("/login", methods=["GET", "POST"])
+@app.route("/login/<lan>", methods=["GET", "POST"])
 @x.no_cache
-def login():
+def login(lan="en"):
+    id(lan)
 
     if request.method == "GET":
         if session.get("user", ""): return redirect(url_for("home"))
-        return render_template("login.html", x=x)
+        # if
+        if lan not in dictionary.allowed_languages: lan="en"
+        # ternary (dont need this because we dont need a if else)
+        return render_template("login.html", x=x, dictionary=dictionary, lan=lan) # pass the dictionary & language in stead of every single sentence
 
     if request.method == "POST":
         try:
+            if lan not in dictionary.allowed_languages: lan="en" # if the landuage does not exist, then it will go back to english language
             # Validate           
             user_email = x.validate_user_email()
             user_password = x.validate_user_password()
@@ -51,13 +58,14 @@ def login():
             db, cursor = x.db()
             cursor.execute(q, (user_email,))
             user = cursor.fetchone()
-            if not user: raise Exception("User not found", 400)
+            # if not user: raise Exception("User not found", 400)
+            if not user: raise Exception(getattr(dictionary, f"{lan}_user_not_found"), 400)
 
             if not check_password_hash(user["user_password"], user_password):
-                raise Exception("Invalid credentials", 400)
+                raise Exception(getattr(dictionary, f"{lan}_invalid_credentials"), 400)
 
             if user["user_verification_key"] != "":
-                raise Exception("User not verified. Please check your email", 400)
+                raise Exception(getattr(dictionary, f"{lan}_not_verified"), 400)
 
             user.pop("user_password")
 

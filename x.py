@@ -126,8 +126,8 @@ def send_email(to_email, subject, template):
         # Copy the key : pdru ctfd jdhk xxci
 
         # Email and password of the sender's Gmail account
-        sender_email = "fullflaskdemomail"
-        password = "wtop ukks heht ulzv "  # If 2FA is on, use an App Password instead
+        sender_email = "espi0001.dummy@gmail.com"
+        password = "nafd zujo bklo qwnc"  # If 2FA is on, use an App Password instead
 
         # Receiver email address
         receiver_email = to_email
